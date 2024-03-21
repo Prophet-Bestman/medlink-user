@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/Button";
 import { useForm } from "react-hook-form";
 import { LoginSchemaType, loginSchema } from "@/schemas/authSchema";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useLogin } from "@/api/auth";
+import { usePractitionerLogin } from "@/api/auth";
 import AuthCard from "./AuthCard";
 import { Input } from "../custom";
 
@@ -17,13 +17,16 @@ export default function SigninForm() {
     resolver: yupResolver(loginSchema),
   });
 
-  const { isPending, mutate } = useLogin();
+  const { isPending, mutate } = usePractitionerLogin();
 
   const onSubmit = (data: LoginSchemaType) => {
     mutate(data);
   };
   return (
-    <AuthCard title="Welcome" subtitle="Complete details to sign in">
+    <AuthCard
+      title="Welcome Practitioner"
+      subtitle="Complete details to sign in"
+    >
       <form onSubmit={handleSubmit(onSubmit)} className="mt-16">
         <div className="flex flex-col gap-4">
           <Input
@@ -54,7 +57,7 @@ export default function SigninForm() {
           <p className="text-center text-zinc-900 text-sm font-normal leading-snug">
             Don’t have an account yet?{" "}
             <Link
-              href="/auth/sign-up"
+              href="/auth/practitioner/sign-up"
               className=" text-indigo-800 text-sm font-semibold underline leading-snug"
             >
               Create one

@@ -1,9 +1,9 @@
-import { dateFormat, timeFormat } from "@/utils/helpers";
+import { timezoneFromat } from "@/utils/helpers";
 import { GoInfo } from "react-icons/go";
-import { IoMdCloseCircleOutline } from "react-icons/io";
 import Image from "next/image";
 import React from "react";
-import { Button } from "../ui/Button";
+import ResheculeAppointmentButton from "./ResheculeAppointmentButton";
+import CancelAppointment from "./CancelAppointment";
 
 interface AppointmentItemProps {
   appointment: UserAppointment;
@@ -46,7 +46,7 @@ export default function AppointmentItem({ appointment }: AppointmentItemProps) {
               width={15}
               height={15}
             />
-            {dateFormat(appointment.date)}
+            {timezoneFromat(appointment.date, appointment.time).clockDate}
           </div>
           <div className="text-center text-neutral-500 text-sm font-medium flex justify-center items-center gap-2">
             <Image
@@ -55,7 +55,7 @@ export default function AppointmentItem({ appointment }: AppointmentItemProps) {
               width={15}
               height={15}
             />
-            {timeFormat(appointment.time)}
+            {timezoneFromat(appointment.date, appointment.time).clockTime}
           </div>
         </div>
         <div className="flex gap-2 items-center">
@@ -79,20 +79,20 @@ export default function AppointmentItem({ appointment }: AppointmentItemProps) {
 
         <div className="flex gap-2 items-center">
           {appointment.status === "pending" && (
-            <Button
-              variant="error"
-              size="sm"
-              className="text-red-500 text-sm w-full md:w-fit "
-            >
-              <IoMdCloseCircleOutline className="text-base -mr-1" />
-              Cancel
-            </Button>
+            // <Button
+            //   variant="error"
+            //   size="sm"
+            //   className="text-red-500 text-sm w-full md:w-fit "
+            //   onClick={onOpen}
+            // >
+            //   <IoMdCloseCircleOutline className="text-base -mr-1" />
+            //   Cancel
+            // </Button>
+            <CancelAppointment appointment={appointment} />
           )}
 
           {appointment.status !== "completed" && (
-            <Button size={"sm"} className="md:w-[124px] w-full">
-              Reschedule
-            </Button>
+            <ResheculeAppointmentButton appointment={appointment} />
           )}
         </div>
       </div>

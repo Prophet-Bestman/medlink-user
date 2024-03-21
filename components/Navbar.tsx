@@ -4,24 +4,20 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FaAngleDown } from "react-icons/fa";
-
-interface token {
-  name: string;
-  value: string;
-}
+import { IoIosLogOut } from "react-icons/io";
 
 const Navbar = () => {
   const pathname = usePathname();
-  const { isLoggedIn, user } = useAuthContext();
+  const { isLoggedIn, logout } = useAuthContext();
 
-  const isPractitionerPage = pathname.startsWith("/practitioner");
+  const isPractitionerPage = pathname.startsWith("/auth/practitioner");
 
   return (
     <header className="sticky top-0 backdrop-blur-xl z-50">
       <nav className="section w-full flex justify-between items-center">
         <h2>
           <Link href="/" className="text-accent-800 font-extrabold text-2xl">
-            Medlink
+            FindCare
           </Link>
         </h2>
 
@@ -43,25 +39,31 @@ const Navbar = () => {
                   : "Book Appointment"}
               </Link>
             </li>
-            <li>
-              <a href="/#faq">FAQ</a>
-            </li>
-            <li>
-              <a href="/#contact">Contact</a>
-            </li>
+
+            <Link href="/#faq">FAQ</Link>
+            <Link href="/#contact">Contact</Link>
           </ul>
 
           <div className="flex gap-2 items-center font-semibold text-accent-800">
             {isLoggedIn ? (
-              <Link
-                href={
-                  isPractitionerPage ? "/practitioner" : "/appointments/history"
-                }
-              >
-                {isPractitionerPage
-                  ? "View Appointments"
-                  : "Appointments History"}
-              </Link>
+              <div className="flex gap-3 items-center">
+                <Link
+                  href={
+                    isPractitionerPage
+                      ? "/practitioner"
+                      : "/appointments/history"
+                  }
+                >
+                  {isPractitionerPage
+                    ? "View Appointments"
+                    : "Appointments History"}
+                </Link>
+
+                <IoIosLogOut
+                  className="text-primary text-xl cursor-pointer"
+                  onClick={logout}
+                />
+              </div>
             ) : (
               <>
                 <Image
@@ -73,7 +75,7 @@ const Navbar = () => {
                 <Link
                   href={
                     isPractitionerPage
-                      ? "/practitioner/sign-in/"
+                      ? "/auth/practitioner/sign-in/"
                       : "/auth/sign-in/"
                   }
                 >

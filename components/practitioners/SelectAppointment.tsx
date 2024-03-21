@@ -4,7 +4,7 @@ import { AvailableDate } from "@/types/date";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useGetPractionerAvailability } from "@/api/practitioner";
 import SelectAvailableTimeSkeleton from "./SelectAvailableTimeSkeleton";
 import { useForm } from "react-hook-form";
@@ -18,11 +18,17 @@ import { useAuthContext } from "@/providers/AuthProvider";
 import { useToast } from "../ui/use-toast";
 import BookingSuccess from "./BookingSuccess";
 import useDisclosure from "@/hooks/useDisclosure";
-import { useBookAppointment } from "@/api/appointments";
+import {
+  useBookAppointment,
+  useRescheduleAppointment,
+} from "@/api/appointments";
 import config from "@/utils/config";
+import { useBookingContext } from "@/providers/BookAppointmentProvider";
 
 const SelectAppointment = ({ id }: { id: string }) => {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
+  const [appointmentDetails, setAppointmentDetails] =
+    useState<AppointmentType | null>(null);
   const { data: scheduleData, isLoading } = useGetPractionerAvailability(id);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -30,6 +36,10 @@ const SelectAppointment = ({ id }: { id: string }) => {
   const { isLoggedIn, user } = useAuthContext();
   const { toast } = useToast();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const appoitmentId = searchParams.get("appointmentId");
+  const { setAppointment, appointmentObj } = useBookingContext();
 
   const {
     register,
@@ -38,6 +48,7 @@ const SelectAppointment = ({ id }: { id: string }) => {
     watch,
   } = useForm<BookAppointmentSchemaType>({
     resolver: yupResolver(bookAppointmentSchema),
+    defaultValues: appointmentObj,
   });
 
   useEffect(() => {
@@ -45,15 +56,24 @@ const SelectAppointment = ({ id }: { id: string }) => {
   }, [watch("date")]);
 
   const { isPending, mutate, data } = useBookAppointment();
+  const {
+    isPending: rescheduling,
+    mutate: reschedule,
+    data: rescheduleData,
+  } = useRescheduleAppointment();
 
   useEffect(() => {
-    if (data) onOpen();
-  }, [data]);
+    if (data || rescheduleData) {
+      setAppointmentDetails(data || rescheduleData || null);
+      onOpen();
+    }
+  }, [data, rescheduleData]);
 
   const onSubmit = (data: BookAppointmentSchemaType) => {
     if (!isLoggedIn || !user?.id) {
       toast({ description: "Please sign in to continue", variant: "error" });
       localStorage.setItem(config.key.redirect, pathname);
+      setAppointment(data);
       router.push("/auth/sign-in");
       return;
     }
@@ -64,21 +84,33 @@ const SelectAppointment = ({ id }: { id: string }) => {
       timeZone: "Africa/lagos",
       userId: user.id.toString(),
     };
-    mutate(payload);
+
+    if (appoitmentId) {
+      reschedule({
+        payload,
+        appointmentId: appoitmentId,
+      });
+    } else {
+      mutate(payload);
+    }
   };
 
   const handleClose = () => {
     onClose();
+    setAppointment({
+      date: "",
+      time: "",
+    });
     router.push("/appointments/history");
   };
 
   return (
     <>
-      {isOpen && data && (
+      {isOpen && appointmentDetails && (
         <BookingSuccess
           onClose={handleClose}
           isOpen={isOpen}
-          scheduleResponse={data}
+          scheduleResponse={appointmentDetails}
         />
       )}
       {isLoading ? (
@@ -145,12 +177,12 @@ const SelectAppointment = ({ id }: { id: string }) => {
           className="!px-12"
           onClick={handleSubmit(onSubmit)}
           disabled={!scheduleData}
-          isLoading={isPending}
+          isLoading={isPending || rescheduling}
         >
-          Book
+          {appoitmentId ? "Reschedule" : "Book"}
         </Button>
         <Button
-          disabled={isPending}
+          disabled={isPending || rescheduling}
           onClick={() => router.back()}
           variant="error"
           className=""

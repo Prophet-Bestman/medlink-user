@@ -2,9 +2,12 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { useForm } from "react-hook-form";
-import { SignupSchemaType, signupSchema } from "@/schemas/authSchema";
+import {
+  PractitionerSignupSchemaType,
+  practitionerSignupSchema,
+} from "@/schemas/authSchema";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useSignup } from "@/api/auth";
+import { usePractitionerSignup } from "@/api/auth";
 import AuthCard from "./AuthCard";
 import { Input } from "../custom";
 
@@ -13,13 +16,13 @@ export default function SignupForm() {
     control,
     handleSubmit,
     formState: { errors },
-  } = useForm<SignupSchemaType>({
-    resolver: yupResolver(signupSchema),
+  } = useForm<PractitionerSignupSchemaType>({
+    resolver: yupResolver(practitionerSignupSchema),
   });
 
-  const { isPending, mutate } = useSignup();
+  const { isPending, mutate } = usePractitionerSignup();
 
-  const onSubmit = (data: SignupSchemaType) => {
+  const onSubmit = (data: PractitionerSignupSchemaType) => {
     mutate(data);
   };
   return (
@@ -44,6 +47,13 @@ export default function SignupForm() {
           label="Email"
           placeholder="Enter Your Email"
           name="email"
+          control={control}
+        />
+        <Input
+          errors={errors}
+          label="Bio"
+          placeholder="Enter Your Bio"
+          name="bio"
           control={control}
         />
 
@@ -75,7 +85,7 @@ export default function SignupForm() {
         <p className="text-center text-zinc-900 text-sm font-normal leading-snug">
           Already have an account?{" "}
           <Link
-            href="/auth/sign-in"
+            href="/auth/practitioner/sign-in"
             className=" text-indigo-800 text-sm font-semibold underline leading-snug"
           >
             Sign In
