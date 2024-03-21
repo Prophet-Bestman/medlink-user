@@ -63,7 +63,7 @@ export const timezoneFromat = (dateString: string, timeString: string) => {
   const combinedDateTime = new Date(combinedDateTimeString);
 
   // Add an hour to the combined datetime
-  combinedDateTime.setHours(combinedDateTime.getHours() + 1);
+  combinedDateTime.setHours(combinedDateTime.getHours() + 0);
 
   // Format the resulting datetime
   const formattedDateTime = combinedDateTime
